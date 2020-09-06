@@ -95,14 +95,19 @@ static void postcar_frame_common_mtrrs(struct postcar_frame *pcf)
  * cache-as-ram is torn down as well as the MTRR settings to use. */
 void prepare_and_run_postcar(struct postcar_frame *pcf)
 {
+	printk(BIOS_NOTICE, "MANUAL DEBUG: postcar_frame_init(pcf, 0).\n");
 	if (postcar_frame_init(pcf, 0))
 		die("Unable to initialize postcar frame.\n");
 
+	printk(BIOS_NOTICE, "MANUAL DEBUG: postcar_frame_init finished. fill_postcar_frame(pcf).\n");
 	fill_postcar_frame(pcf);
 
+	printk(BIOS_NOTICE, "MANUAL DEBUG: fill_postcar_frame finished. postcar_frame_common_mtrrs(pcf).\n");
 	postcar_frame_common_mtrrs(pcf);
 
+	printk(BIOS_NOTICE, "MANUAL DEBUG: postcar_frame_common_mtrrs finished. run_postcar_phase(pcf).\n");
 	run_postcar_phase(pcf);
+	printk(BIOS_NOTICE, "MANUAL DEBUG: run_postcar_phase finished. End prepare_and_run_postcar.\n");
 	/* We do not return here. */
 }
 
@@ -129,28 +134,34 @@ static void finalize_load(uintptr_t *stack_top_ptr, uintptr_t stack_top)
 
 static void load_postcar_cbfs(struct prog *prog, struct postcar_frame *pcf)
 {
+	printk(BIOS_NOTICE, "MANUAL DEBUG: creating rmod_stage_load struct.\n");
 	struct rmod_stage_load rsl = {
 		.cbmem_id = CBMEM_ID_AFTER_CAR,
 		.prog = prog,
 	};
-
+	printk(BIOS_NOTICE, "vboot_run_logic().\n");
 	vboot_run_logic();
 
+	printk(BIOS_NOTICE, "vboot_run_logic finished. prog_locate(prog).\n");
 	if (prog_locate(prog))
 		die_with_post_code(POST_INVALID_ROM,
 				   "Failed to locate after CAR program.\n");
+	printk(BIOS_NOTICE, "prog_locate finished. rmodule_stage_load(&rsl).\n");
 	if (rmodule_stage_load(&rsl))
 		die_with_post_code(POST_INVALID_ROM,
 				   "Failed to load after CAR program.\n");
 
+	printk(BIOS_NOTICE, "rmodule_state_load finished. checking rsl.params == NULL.\n");
 	/* Set the stack pointer within parameters of the program loaded. */
 	if (rsl.params == NULL)
 		die_with_post_code(POST_INVALID_ROM,
 				   "No parameters found in after CAR program.\n");
-
+	printk(BIOS_NOTICE, "checking rsl.params finished. finalize_load(rsl.params, pcf->stack)\n");
 	finalize_load(rsl.params, pcf->stack);
 
+	printk(BIOS_NOTICE, "finalize_load finished. stage_cache_add(STAGE_POSTCAR, prog)\n");
 	stage_cache_add(STAGE_POSTCAR, prog);
+	printk(BIOS_NOTICE, "stage_cache_add finished.\n");
 }
 
 /*
@@ -185,23 +196,30 @@ void run_postcar_phase(struct postcar_frame *pcf)
 
 	if (!CONFIG(NO_STAGE_CACHE) &&
 				romstage_handoff_is_resume()) {
+		printk(BIOS_NOTICE, "MANUAL DEBUG: stage_cache_load_stage(STAGE_POSTCAR, &prog).\n");
 		stage_cache_load_stage(STAGE_POSTCAR, &prog);
+		printk(BIOS_NOTICE, "MANUAL DEBUG: stage_cache_load_stage finished. finalize_load(prog.arg, pcf->stack).\n");
 		/* This is here to allow platforms to pass different stack
 		   parameters between S3 resume and normal boot. On the
 		   platforms where the values are the same it's a nop. */
 		finalize_load(prog.arg, pcf->stack);
+		printk(BIOS_NOTICE, "MANUAL DEBUG: finalize_load finished. check postcar_cache_invalid\n");
 
 		if (prog_entry(&prog) == NULL)
 			postcar_cache_invalid();
+			printk(BIOS_NOTICE, "MANUAL DEBUG: postcar_cache_invalid()!\n");
 	} else
+		printk(BIOS_NOTICE, "MANUAL DEBUG: postcar_cache_invalid check finished. load_postcar_cbfs(&prog, pcf)\n");
 		load_postcar_cbfs(&prog, pcf);
+		printk(BIOS_NOTICE, "MANUAL DEBUG: load_postcar_cbfs finished.\n");
 
 	/* As postcar exist, it's end of romstage here */
+	printk(BIOS_NOTICE, "MANUAL DEBUG: timestamp_add_now(TS_END_ROMSTAGE)\n");
 	timestamp_add_now(TS_END_ROMSTAGE);
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: timestamp_add_now finished. console_time_report()\n");
 	console_time_report();
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: console_time_report finished. prog_set_arg(&prog, cbmem_top())\n");
 	prog_set_arg(&prog, cbmem_top());
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: prog_set_arg finished. prog_run(&prog)\n");
 	prog_run(&prog);
 }

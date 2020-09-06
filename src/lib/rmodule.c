@@ -28,12 +28,13 @@ static inline void *rmodule_load_addr(const struct rmodule *module,
 /* Initialize a rmodule structure based on raw data. */
 int rmodule_parse(void *ptr, struct rmodule *module)
 {
+	printk(BIOS_NOTICE, "MANUAL DEBUG: entered rmodule_parse. initializing vars.\n");
 	char *base;
 	struct rmodule_header *rhdr;
 
 	base = ptr;
 	rhdr = ptr;
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: initializing vars finished. sanity check raw data. \n");
 	if (rhdr == NULL)
 		return -1;
 
@@ -42,19 +43,22 @@ int rmodule_parse(void *ptr, struct rmodule *module)
 		return -1;
 	if (rhdr->version != RMODULE_VERSION_1)
 		return -1;
-
+	
+	printk(BIOS_NOTICE, "MANUAL DEBUG: sanity check finished. set module location to null.\n");
 	/* Indicate the module hasn't been loaded yet. */
 	module->location = NULL;
 
+	printk(BIOS_NOTICE, "MANUAL DEBUG: set module header = rhdr. \n");
 	/* The rmodule only needs a reference to the reloc_header. */
 	module->header = rhdr;
-
+	
+	printk(BIOS_NOTICE, "MANUAL DEBUG: parse module payload, size, and relocations.\n");
 	/* The payload lives after the header. */
 	module->payload = &base[rhdr->payload_begin_offset];
 	module->payload_size = rhdr->payload_end_offset -
 				rhdr->payload_begin_offset;
 	module->relocations = &base[rhdr->relocations_begin_offset];
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: finish parsing.\n");
 	return 0;
 }
 
@@ -111,11 +115,11 @@ static inline size_t rmodule_number_relocations(const struct rmodule *module)
 
 static void rmodule_copy_payload(const struct rmodule *module)
 {
-	printk(BIOS_DEBUG, "Loading module at %p with entry %p. "
-	       "filesize: 0x%x memsize: 0x%x\n",
-	       module->location, rmodule_entry(module),
-	       module->payload_size, rmodule_memory_size(module));
-
+	//printk(BIOS_DEBUG, "Loading module at %p with entry %p. "
+	//       "filesize: 0x%x memsize: 0x%x\n",
+	//       module->location, rmodule_entry(module),
+	//       module->payload_size, rmodule_memory_size(module));
+	printk(BIOS_NOTICE, "Loading module message redacted");
 	/* No need to copy the payload if the load location and the
 	 * payload location are the same. */
 	if (module->location == module->payload)
@@ -271,16 +275,18 @@ int rmodule_stage_load(struct rmod_stage_load *rsl)
 	if (!cbfs_load_and_decompress(fh, sizeof(stage), stage.len, rmod_loc,
 				      stage.memlen, stage.compression))
 		return -1;
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: cbfs_load_and_decompress finished. rmodule_parse(rmod_loc, &rmod_stage).\n");
 	if (rmodule_parse(rmod_loc, &rmod_stage))
+		printk(BIOS_NOTICE, "MANUAL DEBUG: rmodule_parse failed!\n");
 		return -1;
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: rmodule_parse finished. rmodule_load(&stage region[load_offset], &rmod_stage)\n");
 	if (rmodule_load(&stage_region[load_offset], &rmod_stage))
 		return -1;
-
+	printk(BIOS_NOTICE, "MANUAL DEBUG: rmodule_load finished. prog_set_area(rsl->prog, rmod_stage.location, rmodule_memory_size, etc...\n");
 	prog_set_area(rsl->prog, rmod_stage.location,
 			rmodule_memory_size(&rmod_stage));
 
+	printk(BIOS_NOTICE, "MANUAL DEBUG: prog_set_area finished. rmodule_parameters(&rmod_stage)\n");
 	/* Allow caller to pick up parameters, if available. */
 	rsl->params = rmodule_parameters(&rmod_stage);
 

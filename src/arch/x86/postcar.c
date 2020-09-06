@@ -16,10 +16,11 @@ __weak void late_car_teardown(void) { /* do nothing */ }
 
 void main(void)
 {
+	printk(BIOS_NOTICE, "About to start late_car_teardown.");
 	late_car_teardown();
-
+	printk(BIOS_NOTICE, "Completed late_car_teardown");
 	console_init();
-
+	printk(BIOS_NOTICE, "Postcar console initialized");
 	/*
 	 * CBMEM needs to be recovered because timestamps rely on
 	 * the cbmem infrastructure being around. Explicitly recover it.

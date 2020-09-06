@@ -74,13 +74,12 @@ asmlinkage void console_init(void)
 
 	console_inited = 1;
 
-	printk(BIOS_NOTICE, "Proof of console/init.c \n");
+//	printk(BIOS_NOTICE, "Proof of console/init.c \n");
 
-//	printk(BIOS_NOTICE, "\n\ncoreboot-%s%s %s " ENV_STRING " starting (log level: %i)...\n",
-//	       coreboot_version, coreboot_extra_version, coreboot_build,
+//	printk(BIOS_NOTICE, "\n\ncoreboot-%s%s %s " ENV_STRING " starting (log level: ?)...\n",
+//	       coreboot_version, coreboot_extra_version, coreboot_build
 //	       get_log_level());
 
-	printk(BIOS_NOTICE, "\n\ncoreboot log would go here");
-	printk(BIOS_NOTICE, "Proof prink works. \n");
-
+	printk(BIOS_NOTICE, "\n\%s\n", ENV_STRING);
+	
 }

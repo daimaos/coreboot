@@ -53,7 +53,8 @@ static void romstage_main(unsigned long bist)
 
 	if (CONFIG(SMM_TSEG))
 		smm_list_regions();
-
+	
+	printk(BIOS_NOTICE, "MANUAL DEBUG: about to run prepare_and_run_postcar(&early_mtrrs)");
 	prepare_and_run_postcar(&early_mtrrs);
 	/* We do not return here. */
 }
