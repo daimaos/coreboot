@@ -51,11 +51,15 @@ static void bootblock_main_with_timestamp(uint64_t base_timestamp,
 
 	if (CONFIG(BOOTBLOCK_CONSOLE)) {
 		console_init();
+		printk(BIOS_NOTICE, "Console initialized.\n");
 		exception_init();
+		printk(BIOS_NOTICE, "Exception initialized.\n");
 	}
-
+	printk(BIOS_NOTICE, "About to start bootblock_soc_init.\n");
 	bootblock_soc_init();
+	printk(BIOS_NOTICE, "Finished bootblock_soc_init(). About to start bootblock_mainboard_init().\n");
 	bootblock_mainboard_init();
+	printk(BIOS_NOTICE, "Finished bootblock_mainboard_init(). About to run romstage.\n");
 
 	timestamp_add_now(TS_END_BOOTBLOCK);
 
