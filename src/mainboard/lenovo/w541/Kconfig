@@ -8,7 +8,7 @@ config BOARD_SPECIFIC_OPTIONS
 	select EC_LENOVO_PMH7
 	select HAVE_ACPI_RESUME
 	select HAVE_ACPI_TABLES
-	#select HAVE_OPTION_TABLE
+	select HAVE_OPTION_TABLE
 	#select HAVE_CMOS_DEFAULT
 	select INTEL_GMA_HAVE_VBT
 	select INTEL_INT15
@@ -16,6 +16,7 @@ config BOARD_SPECIFIC_OPTIONS
 	select NORTHBRIDGE_INTEL_HASWELL
 	select SERIRQ_CONTINUOUS_MODE
 	select SOUTHBRIDGE_INTEL_LYNXPOINT
+	select DRIVERS_LENOVO_HYBRID_GRAPHICS
 	select SYSTEM_TYPE_LAPTOP
 	select MAINBOARD_USES_IFD_GBE_REGION
 	#select CONSOLE_POST
@@ -36,6 +37,12 @@ config VGA_BIOS_FILE
 config VGA_BIOS_ID
 	string
 	default "8086,0416"
+config VGA_BIOS_DGPU_ID
+	string
+	default "10de,0ff6"
+config VGA_BIOS_DGPU_FILE
+	string
+	default "pcie10de,0ff6.rom"
 
 config USBDEBUG_HCD_INDEX # FIXME: check this
 	int

@@ -1,9 +1,12 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
-
 #include <stdint.h>
 #include <northbridge/intel/haswell/haswell.h>
 #include <northbridge/intel/haswell/raminit.h>
 #include <southbridge/intel/lynxpoint/pch.h>
+#include <option.h>
+#include <ec/lenovo/pmh7/pmh7.h>
+#include <device/pci_ops.h>
+
 
 void mainboard_config_rcba(void)
 {
@@ -16,12 +19,32 @@ void mainboard_config_rcba(void)
 	RCBA16(D22IR) = DIR_ROUTE(PIRQA, PIRQB, PIRQC, PIRQD);
 	RCBA16(D20IR) = DIR_ROUTE(PIRQA, PIRQB, PIRQC, PIRQD);
 }
+void mb_late_romstage_setup(void)
+{
+        u8 enable_peg;
+        if (get_option(&enable_peg, "enable_dual_graphics") != CB_SUCCESS)
+                enable_peg = 0;
+
+        bool power_en = pmh7_dgpu_power_state();
+
+        if (enable_peg != power_en)
+                pmh7_dgpu_power_enable(!power_en);
+
+        if (!enable_peg) {
+                // Hide disabled dGPU device
+                u32 reg32 = pci_read_config32(PCI_DEV(0, 0, 0), DEVEN);
+                reg32 &= ~DEVEN_D1F0EN;
+
+                pci_write_config32(PCI_DEV(0, 0, 0), DEVEN, reg32);
+        }
+}
+
 
 void mb_get_spd_map(uint8_t spd_map[4])
 {
 	spd_map[0] = 0xa0;
-	spd_map[1] = 0xa2;
-	spd_map[2] = 0xa4;
+	spd_map[1] = 0xa4;
+	spd_map[2] = 0xa2;
 	spd_map[3] = 0xa6;
 }
 
@@ -44,6 +67,7 @@ void mainboard_fill_pei_data(struct pei_data *pei_data)
 		{ 0x0040, 1, 6, USB_PORT_BACK_PANEL },
 		{ 0x0040, 1, 6, USB_PORT_BACK_PANEL },
 	};
+
 
 	struct usb3_port_setting usb3_ports[MAX_USB3_PORTS] = {
 		{ 1, 0 },

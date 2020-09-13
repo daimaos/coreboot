@@ -4,7 +4,6 @@ chip northbridge/intel/haswell # FIXME: check gfx
 	register "gpu_dp_b_hotplug" = "4"
 	register "gpu_dp_c_hotplug" = "4"
 	register "gpu_dp_d_hotplug" = "4"
-	register "gpu_panel_port_select" = "0"
 	register "gpu_panel_power_backlight_off_delay" = "1"
 	register "gpu_panel_power_backlight_on_delay" = "1"
 	register "gpu_panel_power_cycle_delay" = "6"
@@ -89,6 +88,20 @@ chip northbridge/intel/haswell # FIXME: check gfx
 						io 0x64 = 0x1600
 						io 0x66 = 0x1604
 					end
+					chip drivers/lenovo/hybrid_graphics
+                                        device pnp ff.f on end # dummy
+
+                                        register "detect_gpio" = "21"
+
+                                        register "has_panel_hybrid_gpio" = "1"
+                                        register "panel_hybrid_gpio" = "52"
+                                        register "panel_integrated_lvl" = "1"
+
+                                        register "has_backlight_gpio" = "0"
+                                        register "has_dgpu_power_gpio" = "0"
+
+                                        register "has_thinker1" = "1"
+						end
 				end
 			end
 			device pci 1f.2 on end # SATA Controller 1
